@@ -5,6 +5,7 @@ import { describe, expect, it } from "vite-plus/test";
 import { ElectronBrowserHost } from "./browser/ElectronBrowserHost";
 import { PreviewAutomationHosts } from "./components/preview/PreviewAutomationHosts";
 import { QuitHoldOverlay } from "./components/QuitHoldOverlay";
+import { DesignOnboardingGate } from "./onboarding/DesignOnboardingGate";
 import { AppAtomRegistryProvider } from "./rpc/atomRegistry";
 import type { AppRouter } from "./router";
 import { AppRoot } from "./AppRoot";
@@ -18,7 +19,11 @@ describe("AppRoot", () => {
       (root as ReactElement<{ readonly children: ReactNode }>).props.children,
     );
     expect(children).toHaveLength(4);
-    expect(isValidElement(children[0]) && children[0].type).toBe(RouterProvider);
+    expect(isValidElement(children[0]) && children[0].type).toBe(DesignOnboardingGate);
+    const onboardingChild = isValidElement<{ readonly children: ReactNode }>(children[0])
+      ? children[0].props.children
+      : null;
+    expect(isValidElement(onboardingChild) && onboardingChild.type).toBe(RouterProvider);
     expect(isValidElement(children[1]) && children[1].type).toBe(PreviewAutomationHosts);
     expect(isValidElement(children[2]) && children[2].type).toBe(ElectronBrowserHost);
     expect(isValidElement(children[3]) && children[3].type).toBe(QuitHoldOverlay);

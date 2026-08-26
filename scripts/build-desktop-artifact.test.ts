@@ -491,10 +491,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
       assert.notProperty(linux, "asarUnpack");
       assert.notProperty(win, "asarUnpack");
       assert.deepStrictEqual(win.extraResources, [
-        {
-          from: "apps/desktop/prod-resources/resource-monitor",
-          to: "resource-monitor",
-        },
+        ...DESKTOP_EXTRA_RESOURCES,
         ...WINDOWS_SERVER_EXTRA_RESOURCES,
       ]);
       assert.deepStrictEqual(win.nsis, { differentialPackage: true });
@@ -1245,6 +1242,14 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
       {
         from: "apps/desktop/prod-resources/resource-monitor",
         to: "resource-monitor",
+      },
+      {
+        from: "THIRD_PARTY_NOTICES.md",
+        to: "THIRD_PARTY_NOTICES.md",
+      },
+      {
+        from: "third-party/open-design/LICENSE",
+        to: "licenses/open-design-APACHE-2.0.txt",
       },
     ]);
     assert.deepStrictEqual(resolveResourceMonitorRustTargets("mac", "universal"), [

@@ -146,6 +146,7 @@ import {
 } from "./settingsLayout";
 import { searchableSetting } from "./settingsSearch";
 import { ProjectFavicon } from "../ProjectFavicon";
+import { resetDesignOnboarding } from "../../onboarding/designOnboarding";
 
 const ENVIRONMENT_IDENTIFICATION_LABELS: Record<EnvironmentIdentificationMode, string> = {
   artwork: "Artwork",
@@ -2481,6 +2482,22 @@ export function GeneralSettingsPanel() {
             description="Current version of the application."
           />
         )}
+        <SettingsRow
+          title="First-run guide"
+          description="Review agent, design context, and project setup again."
+          control={
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() => {
+                resetDesignOnboarding();
+                window.location.reload();
+              }}
+            >
+              Replay onboarding
+            </Button>
+          }
+        />
         <SettingsRow
           {...searchableSetting("diagnostics")}
           description={diagnosticsDescription}

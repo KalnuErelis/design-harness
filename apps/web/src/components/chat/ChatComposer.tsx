@@ -262,6 +262,7 @@ import {
   type ProviderInstanceEntry,
 } from "../../providerInstances";
 import { type AppModelOption, getAppModelOptionsForInstance } from "../../modelSelection";
+import { useDesignAgentPreference } from "../../onboarding/designOnboarding";
 import type { UnifiedSettings } from "@t3tools/contracts/settings";
 import type { SessionPhase, Thread } from "../../types";
 import type { PendingUserInputDraftAnswer } from "../../pendingUserInput";
@@ -825,6 +826,17 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       ),
     [providerStatuses, settings],
   );
+  const designAgentPreference = useDesignAgentPreference();
+  const preferredProviderEntry = useMemo(
+    () =>
+      designAgentPreference
+        ? resolveSelectableProviderInstanceEntry(
+            providerInstanceEntries.filter((entry) => entry.driverKind === designAgentPreference),
+            undefined,
+          )
+        : undefined,
+    [designAgentPreference, providerInstanceEntries],
+  );
   const selectedProviderByThreadId = composerDraft.activeProvider ?? null;
   const threadProvider =
     activeThread?.session?.providerInstanceId ??
@@ -839,6 +851,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       providerStatuses,
       explicitSelectedInstanceId,
     ) ??
+    preferredProviderEntry?.driverKind ??
     providerInstanceEntries[0]?.driverKind ??
     ProviderDriverKind.make("unconfigured");
   const requestedDriverKind: ProviderDriverKind = lockedProvider ?? unlockedSelectedProvider;

@@ -69,7 +69,7 @@ Before you call product work done, check these items:
 - Ports derive from the worktree path and are stable across restarts, but read the real ones from the `[dev-runner]` line since occupied ports shift.
 - Sharing over the tailnet is three steps: run `vp run dev --share` in the background, wait for the `pairingUrl:` line in its output, paste that full URL (token included) in your reply. Do not wire up `tailscale serve` by hand for this, and do not open the URL yourself.
 - The web app requires pairing. Hand over the pairing URL, not the bare origin. A URL without its token is useless to whoever you gave it to. If the token got consumed, mint a fresh one with `node apps/server/src/bin.ts pair` — note it carries standard scopes, while the startup URL carries admin scopes (needed for Settings → Connections management).
-- Stop what you started, by the PID you tracked. See rule 1.
+- Stop what you started, by the PID you tracked. For a background development run, track `scripts/dev-runner.ts` rather than the outer pnpm shell so its shutdown handler can stop Electron, Vite, and the backend. After a desktop run, also confirm that no orphaned `scripts/dev-electron.mjs` process remains; it will restart Electron after you close the app. See rule 1.
 
 ## Test data
 

@@ -8,6 +8,7 @@ The core loop is:
 
 ## Current product slice
 
+- Start with a guided Codex or Claude setup.
 - Open a local project.
 - Choose a design workflow.
 - Run Codex or Claude in the real project folder.
@@ -52,4 +53,4 @@ corepack pnpm run build:desktop
 
 Design Harness starts from [T3 Code](https://github.com/pingdotgg/t3code). T3 Code is Copyright © 2026 T3 Tools Inc. and is available under the MIT License in [`LICENSE`](./LICENSE).
 
-Open Design is a product and design reference for later work. This first product slice does not copy Open Design source code.
+The first-run flow adapts the onboarding layout and artwork from [Open Design](https://github.com/nexu-io/open-design) under Apache License 2.0. See [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md) and [`third-party/open-design/LICENSE`](./third-party/open-design/LICENSE).

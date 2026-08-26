@@ -857,6 +857,14 @@ export const DESKTOP_EXTRA_RESOURCES = [
     from: "apps/desktop/prod-resources/resource-monitor",
     to: "resource-monitor",
   },
+  {
+    from: "THIRD_PARTY_NOTICES.md",
+    to: "THIRD_PARTY_NOTICES.md",
+  },
+  {
+    from: "third-party/open-design/LICENSE",
+    to: "licenses/open-design-APACHE-2.0.txt",
+  },
 ] as const;
 
 export interface MacPasskeySigningConfiguration {
@@ -2861,6 +2869,14 @@ const buildDesktopArtifact = Effect.fn("buildDesktopArtifact")(function* (
   yield* Effect.log("[desktop-artifact] Staging release app...");
   yield* fs.copy(distDirs.desktopDist, path.join(stageAppDir, "apps/desktop/dist-electron"));
   yield* fs.copy(distDirs.desktopResources, stageResourcesDir);
+  yield* fs.copy(
+    path.join(repoRoot, "THIRD_PARTY_NOTICES.md"),
+    path.join(stageAppDir, "THIRD_PARTY_NOTICES.md"),
+  );
+  yield* fs.copy(
+    path.join(repoRoot, "third-party/open-design/LICENSE"),
+    path.join(stageAppDir, "third-party/open-design/LICENSE"),
+  );
   if (options.platform === "mac" && options.target === "dmg") {
     yield* stageDesktopDmgBackground(
       stageResourcesDir,
