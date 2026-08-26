@@ -178,8 +178,8 @@ const make = Effect.fn("desktop.environment.make")(function* (
     joinPath: path.join,
     t3Home: config.t3Home,
   });
-  const userDataDirName = isDevelopment ? "t3code-dev" : "t3code";
-  const legacyUserDataDirName = isDevelopment ? "T3 Code (Dev)" : "T3 Code (Alpha)";
+  const userDataDirName = isDevelopment ? "design-harness-dev" : "design-harness";
+  const legacyUserDataDirName = isDevelopment ? "Design Harness (Dev)" : "Design Harness (Alpha)";
   const linuxApplicationsDir = path.join(
     Option.getOrElse(config.xdgDataHome, () => path.join(homeDirectory, ".local", "share")),
     "applications",
@@ -224,10 +224,10 @@ const make = Effect.fn("desktop.environment.make")(function* (
     branding,
     displayName,
     appUserModelId: Option.getOrElse(config.appUserModelIdOverride, () =>
-      isDevelopment ? "com.t3tools.t3code.dev" : "com.t3tools.t3code",
+      isDevelopment ? "com.jauniuskadunas.designharness.dev" : "com.jauniuskadunas.designharness",
     ),
-    linuxDesktopEntryName: isDevelopment ? "t3code-dev.desktop" : "t3code.desktop",
-    linuxWmClass: isDevelopment ? "t3code-dev" : "t3code",
+    linuxDesktopEntryName: isDevelopment ? "design-harness-dev.desktop" : "design-harness.desktop",
+    linuxWmClass: isDevelopment ? "design-harness-dev" : "design-harness",
     linuxApplicationsDir,
     appImagePath: config.appImagePath,
     userDataDirName,
