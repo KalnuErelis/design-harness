@@ -15,3 +15,16 @@ The first-run onboarding layout, onboarding artwork, selected design-system defi
 - License: Apache License 2.0 (`third-party/open-design/LICENSE`)
 
 Changes include Design Harness copy, agent choices, creator influence controls, repository-backed design-system context, project selection, responsive behavior, and integration with the T3 Code runtime.
+
+## Simple Icons
+
+The designer toolkit uses vector path data from Simple Icons for product and service identification.
+
+- Source: <https://github.com/simple-icons/simple-icons>
+- License: CC0 1.0 (`third-party/simple-icons/LICENSE.md`)
+
+Simple Icons does not waive third-party trademark rights. Product names and marks belong to their respective owners.
+
+## Toolkit website marks
+
+The toolkit shows official favicons from the linked component libraries and design resources. These marks identify their source sites. Their inclusion does not imply endorsement by the site owners.

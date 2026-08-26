@@ -25,6 +25,7 @@ import {
   useActiveDesignSystem,
   writeActiveDesignSystem,
 } from "./designSystems";
+import { DesignerToolkitControl } from "./DesignerToolkitControl";
 import {
   DESIGN_INFLUENCES,
   useDesignInfluenceIds,
@@ -156,6 +157,8 @@ export function DesignContextControls({
           </MenuItem>
         </MenuPopup>
       </Menu>
+
+      <DesignerToolkitControl />
 
       <Menu>
         <MenuTrigger

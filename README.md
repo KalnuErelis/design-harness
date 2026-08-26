@@ -13,6 +13,8 @@ The core loop is:
 - Choose a design workflow.
 - Pull an Open Design system or import a local `DESIGN.md` as live thread context.
 - Add opinionated craft approaches from Emil Kowalski and similar creators.
+- Search a designer toolkit with frameworks, StyleX and other styling systems, component libraries, motion tools, real asset sources, quality checks, and agent skills.
+- Apply an anti-slop quality gate to normal design turns.
 - Run Codex or Claude in the real project folder.
 - Open the live interface in the design canvas.
 - Test desktop, tablet, mobile, and custom viewports.
@@ -55,4 +57,4 @@ corepack pnpm run build:desktop
 
 Design Harness starts from [T3 Code](https://github.com/pingdotgg/t3code). T3 Code is Copyright © 2026 T3 Tools Inc. and is available under the MIT License in [`LICENSE`](./LICENSE).
 
-The first-run flow adapts the onboarding layout and artwork from [Open Design](https://github.com/nexu-io/open-design) under Apache License 2.0. See [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md) and [`third-party/open-design/LICENSE`](./third-party/open-design/LICENSE).
+The first-run flow adapts the onboarding layout and artwork from [Open Design](https://github.com/nexu-io/open-design) under Apache License 2.0. The designer toolkit uses [Simple Icons](https://simpleicons.org/) under CC0 1.0. See [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md), [`third-party/open-design/LICENSE`](./third-party/open-design/LICENSE), and [`third-party/simple-icons/LICENSE.md`](./third-party/simple-icons/LICENSE.md).

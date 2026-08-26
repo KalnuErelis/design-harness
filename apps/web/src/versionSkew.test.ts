@@ -19,7 +19,7 @@ import {
 } from "./versionSkew";
 
 const MISMATCH_HINT =
-  "Version mismatch. Try syncing the client and server to the same T3 Code version.";
+  "Version mismatch. Sync the client and server to the same Design Harness version.";
 
 describe("versionSkew", () => {
   beforeEach(() => {

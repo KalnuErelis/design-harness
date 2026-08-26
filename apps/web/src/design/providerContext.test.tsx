@@ -13,6 +13,7 @@ describe("design provider context", () => {
       prompt: "Polish the account page.",
       designSystem: system,
       influenceIds: ["emil-kowalski", "jakub-krehel"],
+      toolkitIds: ["stylex", "leonxlnx-design-taste"],
     });
 
     expect(input).toMatch(/^Polish the account page\./);
@@ -20,6 +21,9 @@ describe("design provider context", () => {
     expect(input).toContain(system.relativePath);
     expect(input).toContain("Emil Kowalski");
     expect(input).toContain("Jakub Krehel");
+    expect(input).toContain("StyleX");
+    expect(input).toContain("leonxlnx-design-taste-frontend");
+    expect(input).toContain("Design Harness quality gate");
 
     const renderedMessage = renderToStaticMarkup(
       <ReactMarkdown>{stripDesignProviderContext(input)}</ReactMarkdown>,
@@ -35,17 +39,21 @@ describe("design provider context", () => {
         prompt: "/compact",
         designSystem: system,
         influenceIds: ["emil-kowalski"],
+        toolkitIds: ["uish-design"],
       }),
     ).toBe("/compact");
   });
 
-  it("returns the prompt unchanged when no context is active", () => {
-    expect(
-      composeDesignProviderInput({
-        prompt: "Explain this component.",
-        designSystem: null,
-        influenceIds: [],
-      }),
-    ).toBe("Explain this component.");
+  it("keeps the quality gate active when no optional context is selected", () => {
+    const input = composeDesignProviderInput({
+      prompt: "Explain this component.",
+      designSystem: null,
+      influenceIds: [],
+      toolkitIds: [],
+    });
+
+    expect(input).toMatch(/^Explain this component\./);
+    expect(input).toContain("Design Harness quality gate");
+    expect(stripDesignProviderContext(input)).toBe("Explain this component.");
   });
 });

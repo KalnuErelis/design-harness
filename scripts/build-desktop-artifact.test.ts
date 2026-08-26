@@ -1251,6 +1251,10 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
         from: "third-party/open-design/LICENSE",
         to: "licenses/open-design-APACHE-2.0.txt",
       },
+      {
+        from: "third-party/simple-icons/LICENSE.md",
+        to: "licenses/simple-icons-CC0-1.0.txt",
+      },
     ]);
     assert.deepStrictEqual(resolveResourceMonitorRustTargets("mac", "universal"), [
       "aarch64-apple-darwin",

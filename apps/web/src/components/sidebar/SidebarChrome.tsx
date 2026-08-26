@@ -1,7 +1,6 @@
 import {
   ArrowLeftIcon,
   ChartNoAxesColumnIcon,
-  FrameIcon,
   GitPullRequestIcon,
   SettingsIcon,
 } from "lucide-react";
@@ -10,6 +9,7 @@ import { memo, useCallback } from "react";
 import { Link, useCanGoBack, useLocation, useNavigate } from "@tanstack/react-router";
 
 import { useEnvironmentIdentificationMode } from "../../hooks/useSettings";
+import { DesignHarnessMark } from "../DesignHarnessMark";
 import { cn } from "../../lib/utils";
 import { useEnvironments } from "../../state/environments";
 import {
@@ -90,14 +90,7 @@ function SidebarBrand({ onBackdrop }: { onBackdrop: boolean }) {
       )}
       to="/"
     >
-      <span
-        className={cn(
-          "grid size-5 shrink-0 place-items-center rounded-md shadow-xs",
-          onBackdrop ? "bg-white/16 text-white" : "bg-foreground text-background",
-        )}
-      >
-        <FrameIcon className="size-3" aria-hidden="true" />
-      </span>
+      <DesignHarnessMark className="size-5 rounded-md shadow-xs" />
       <span
         className={cn(
           "truncate text-sm font-medium tracking-tight",

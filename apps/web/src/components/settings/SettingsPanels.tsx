@@ -2484,7 +2484,7 @@ export function GeneralSettingsPanel() {
         )}
         <SettingsRow
           title="First-run guide"
-          description="Review agent, design context, and project setup again."
+          description="Review the agent, toolkit, design context, and project setup again."
           control={
             <Button
               size="xs"

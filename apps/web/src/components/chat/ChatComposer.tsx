@@ -265,6 +265,7 @@ import { type AppModelOption, getAppModelOptionsForInstance } from "../../modelS
 import { useDesignAgentPreference } from "../../onboarding/designOnboarding";
 import { useActiveDesignSystem } from "../../design/designSystems";
 import { useDesignInfluenceIds } from "../../design/influences";
+import { useDesignerToolkitIds } from "../../design/designerToolkit";
 import { composeDesignProviderInput } from "../../design/providerContext";
 import type { UnifiedSettings } from "@t3tools/contracts/settings";
 import type { SessionPhase, Thread } from "../../types";
@@ -832,6 +833,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
   const designAgentPreference = useDesignAgentPreference();
   const activeDesignSystem = useActiveDesignSystem();
   const designInfluenceIds = useDesignInfluenceIds();
+  const designerToolkitIds = useDesignerToolkitIds();
   const preferredProviderEntry = useMemo(
     () =>
       designAgentPreference
@@ -1991,6 +1993,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
             prompt: visiblePrompt,
             designSystem: activeDesignSystem,
             influenceIds: designInfluenceIds,
+            toolkitIds: designerToolkitIds,
           });
       const submission = submitComposerDraft({
         prompt: visiblePrompt,
@@ -2022,6 +2025,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       activePendingProgress,
       blurMobileComposerAfterSend,
       designInfluenceIds,
+      designerToolkitIds,
       isSendDisabled,
       noProviderAvailable,
       onSend,

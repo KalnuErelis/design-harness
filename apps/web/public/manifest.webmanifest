@@ -1,5 +1,8 @@
 {
   "id": "/",
+  "name": "Design Harness",
+  "short_name": "Design Harness",
+  "description": "A local design workspace for coding agents.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

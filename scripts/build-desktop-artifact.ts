@@ -865,6 +865,10 @@ export const DESKTOP_EXTRA_RESOURCES = [
     from: "third-party/open-design/LICENSE",
     to: "licenses/open-design-APACHE-2.0.txt",
   },
+  {
+    from: "third-party/simple-icons/LICENSE.md",
+    to: "licenses/simple-icons-CC0-1.0.txt",
+  },
 ] as const;
 
 export interface MacPasskeySigningConfiguration {
@@ -2876,6 +2880,10 @@ const buildDesktopArtifact = Effect.fn("buildDesktopArtifact")(function* (
   yield* fs.copy(
     path.join(repoRoot, "third-party/open-design/LICENSE"),
     path.join(stageAppDir, "third-party/open-design/LICENSE"),
+  );
+  yield* fs.copy(
+    path.join(repoRoot, "third-party/simple-icons/LICENSE.md"),
+    path.join(stageAppDir, "third-party/simple-icons/LICENSE.md"),
   );
   if (options.platform === "mac" && options.target === "dmg") {
     yield* stageDesktopDmgBackground(

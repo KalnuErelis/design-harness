@@ -3,12 +3,12 @@ import {
   CheckIcon,
   ChevronLeftIcon,
   FolderOpenIcon,
-  FrameIcon,
   SparklesIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { openCommandPalette } from "../commandPaletteBus";
+import { DesignHarnessMark } from "../components/DesignHarnessMark";
 import { ClaudeAI, OpenAI, type Icon } from "../components/Icons";
 import { Button } from "../components/ui/button";
 import { cn } from "../lib/utils";
@@ -26,6 +26,13 @@ import {
   type DesignInfluenceId,
 } from "../design/influences";
 import {
+  readDesignerToolkitIds,
+  writeDesignerToolkitIds,
+  type DesignerToolkitId,
+} from "../design/designerToolkit";
+import { DesignerToolkitStep } from "./DesignerToolkitStep";
+import { DESIGN_ONBOARDING_PRIMARY_BUTTON_CLASS } from "./onboardingStyles";
+import {
   completeDesignOnboarding,
   hasCompletedDesignOnboarding,
   readDesignAgentPreference,
@@ -33,7 +40,7 @@ import {
   type DesignAgentPreference,
 } from "./designOnboarding";
 
-const LAST_STEP = 4;
+const LAST_STEP = 5;
 
 const AGENT_OPTIONS: ReadonlyArray<{
   readonly id: DesignAgentPreference;
@@ -64,6 +71,7 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
     () => readDesignAgentPreference() ?? "codex",
   );
   const [influenceIds, setInfluenceIds] = useState<DesignInfluenceId[]>(readDesignInfluenceIds);
+  const [toolkitIds, setToolkitIds] = useState<DesignerToolkitId[]>(readDesignerToolkitIds);
   const [designSystemId, setDesignSystemId] = useState<string | null>(
     () => readActiveDesignSystem()?.id ?? null,
   );
@@ -99,12 +107,13 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
       <section className="relative flex min-h-0 flex-col px-6 pb-6 pt-14 sm:px-12 sm:pb-10 sm:pt-16 lg:px-16 lg:pb-12 lg:pt-20">
         <header className="no-drag flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="grid size-8 place-items-center rounded-[10px] bg-foreground text-background shadow-sm">
-              <FrameIcon className="size-4" aria-hidden="true" />
-            </span>
+            <DesignHarnessMark className="size-8 rounded-lg" />
             <span className="text-sm font-semibold tracking-[-0.02em]">Design Harness</span>
           </div>
-          <div className="flex items-center gap-1.5" aria-label={`Step ${step + 1} of 5`}>
+          <div
+            className="flex items-center gap-1.5"
+            aria-label={`Step ${step + 1} of ${LAST_STEP + 1}`}
+          >
             {Array.from({ length: LAST_STEP + 1 }, (_, index) => (
               <span
                 key={index}
@@ -162,6 +171,18 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
               }}
             />
           ) : step === 3 ? (
+            <DesignerToolkitStep
+              selectedIds={toolkitIds}
+              onChange={(nextIds) => {
+                setToolkitIds(nextIds);
+                writeDesignerToolkitIds(nextIds);
+              }}
+              onContinue={() => {
+                writeDesignerToolkitIds(toolkitIds);
+                setStep(4);
+              }}
+            />
+          ) : step === 4 ? (
             <DesignContextStep
               selectedId={designSystemId}
               onSelect={(nextId) => {
@@ -174,7 +195,7 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
                   });
                 }
               }}
-              onContinue={() => setStep(4)}
+              onContinue={() => setStep(5)}
             />
           ) : (
             <ProjectStep
@@ -207,7 +228,7 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
           <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/65 via-black/20 to-transparent px-10 pb-10 pt-28 text-white">
             <div className="mb-4 flex items-center gap-2 text-white/75">
               <SparklesIcon className="size-4" />
-              <span className="text-xs font-semibold uppercase tracking-[0.16em]">
+              <span className="font-mono text-xs font-semibold uppercase tracking-wide">
                 Live design loop
               </span>
             </div>
@@ -224,17 +245,17 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
 function OnboardingIntro({ onContinue }: { readonly onContinue: () => void }) {
   return (
     <div>
-      <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="mb-4 font-mono text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Welcome to Design Harness
       </p>
-      <h1 className="text-[clamp(2.25rem,5vw,3.5rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-balance">
+      <h1 className="text-balance text-[clamp(2.25rem,5vw,3.5rem)] font-semibold tracking-tight">
         Design with your coding agent.
       </h1>
       <p className="mt-6 max-w-[42ch] text-base leading-7 text-muted-foreground">
         Turn a real project into a live canvas. Preview, point, annotate, revise, compare, and
         restore without leaving the code.
       </p>
-      <Button className="mt-9 h-12 w-full rounded-xl text-base" onClick={onContinue}>
+      <Button className={cn("mt-9", DESIGN_ONBOARDING_PRIMARY_BUTTON_CLASS)} onClick={onContinue}>
         Get started
         <ArrowRightIcon className="size-4" />
       </Button>
@@ -253,10 +274,12 @@ function AgentStep({
 }) {
   return (
     <div>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Agent
       </p>
-      <h1 className="text-3xl font-semibold tracking-[-0.04em]">Choose your design agent.</h1>
+      <h1 className="text-balance text-3xl font-semibold tracking-tight">
+        Choose your design agent.
+      </h1>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         Design Harness uses the CLI and account already available on this Mac.
       </p>
@@ -276,14 +299,12 @@ function AgentStep({
               />
               <span
                 className={cn(
-                  "grid min-h-[82px] grid-cols-[44px_minmax(0,1fr)_20px] items-center gap-3 rounded-2xl bg-card/45 p-3.5 shadow-[0_0_0_1px_var(--contrast-border)] transition-[background-color,box-shadow,transform] duration-150 hover:bg-accent/45 active:scale-[0.99] peer-focus-visible:ring-2 peer-focus-visible:ring-ring motion-reduce:transition-none",
+                  "grid min-h-[82px] grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-3 rounded-2xl bg-card/45 p-3.5 shadow-[0_0_0_1px_var(--contrast-border)] hover:bg-accent/45 active:scale-[0.99] peer-focus-visible:ring-2 peer-focus-visible:ring-ring",
                   active &&
                     "bg-card shadow-[0_0_0_1.5px_var(--contrast-foreground),0_8px_24px_rgb(0_0_0/0.06)]",
                 )}
               >
-                <span className="grid size-11 place-items-center rounded-xl bg-background text-muted-foreground shadow-[0_0_0_1px_var(--contrast-border)]">
-                  <OptionIcon className="size-5" aria-hidden="true" />
-                </span>
+                <OptionIcon className="size-5 shrink-0" aria-hidden="true" />
                 <span className="min-w-0">
                   <strong className="block text-sm font-semibold">{option.title}</strong>
                   <span className="mt-1 block text-xs leading-5 text-muted-foreground">
@@ -303,7 +324,7 @@ function AgentStep({
           );
         })}
       </div>
-      <Button className="mt-7 h-12 w-full rounded-xl text-base" onClick={onContinue}>
+      <Button className={cn("mt-7", DESIGN_ONBOARDING_PRIMARY_BUTTON_CLASS)} onClick={onContinue}>
         Continue
       </Button>
     </div>
@@ -321,10 +342,12 @@ function DesignInfluenceStep({
 }) {
   return (
     <div>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Design influences
       </p>
-      <h1 className="text-3xl font-semibold tracking-[-0.04em]">Choose who shapes the critique.</h1>
+      <h1 className="text-balance text-3xl font-semibold tracking-tight">
+        Choose who shapes the critique.
+      </h1>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         Add opinionated craft lenses to every design turn. Mix them, remove them, or change them
         beside the workflow controls later.
@@ -348,18 +371,15 @@ function DesignInfluenceStep({
               />
               <span
                 className={cn(
-                  "grid min-h-[60px] grid-cols-[36px_minmax(0,1fr)_20px] items-center gap-3 rounded-xl bg-card/45 px-3 py-2 shadow-[0_0_0_1px_var(--contrast-border)] transition-[background-color,box-shadow,transform] duration-150 hover:bg-accent/45 active:scale-[0.99] peer-focus-visible:ring-2 peer-focus-visible:ring-ring motion-reduce:transition-none",
+                  "grid min-h-[60px] grid-cols-[20px_minmax(0,1fr)_20px] items-center gap-3 rounded-xl bg-card/45 px-3 py-2 shadow-[0_0_0_1px_var(--contrast-border)] hover:bg-accent/45 active:scale-[0.99] peer-focus-visible:ring-2 peer-focus-visible:ring-ring",
                   selected &&
                     "bg-card shadow-[0_0_0_1.5px_var(--contrast-foreground),0_6px_20px_rgb(0_0_0/0.05)]",
                 )}
               >
-                <span className="grid size-9 place-items-center rounded-lg bg-background text-xs font-semibold shadow-[0_0_0_1px_var(--contrast-border)]">
-                  {influence.name
-                    .split(" ")
-                    .map((part) => part[0])
-                    .join("")
-                    .slice(0, 2)}
-                </span>
+                <SparklesIcon
+                  className="size-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <span className="min-w-0">
                   <span className="flex items-baseline justify-between gap-3">
                     <strong className="text-sm font-semibold">{influence.name}</strong>
@@ -384,7 +404,7 @@ function DesignInfluenceStep({
           );
         })}
       </div>
-      <Button className="mt-6 h-12 w-full rounded-xl text-base" onClick={onContinue}>
+      <Button className={cn("mt-6", DESIGN_ONBOARDING_PRIMARY_BUTTON_CLASS)} onClick={onContinue}>
         Continue
       </Button>
     </div>
@@ -402,10 +422,12 @@ function DesignContextStep({
 }) {
   return (
     <div>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Design context
       </p>
-      <h1 className="text-3xl font-semibold tracking-[-0.04em]">Start from a design system.</h1>
+      <h1 className="text-balance text-3xl font-semibold tracking-tight">
+        Start from a design system.
+      </h1>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         Pull a full Open Design system into the project, or start with repository rules only. You
         can switch systems while the thread is active.
@@ -431,7 +453,7 @@ function DesignContextStep({
         The active system is saved under <code>.design-harness/design-systems</code> and added as
         context on every design turn.
       </p>
-      <Button className="mt-4 h-12 w-full rounded-xl text-base" onClick={onContinue}>
+      <Button className={cn("mt-4", DESIGN_ONBOARDING_PRIMARY_BUTTON_CLASS)} onClick={onContinue}>
         Continue
       </Button>
     </div>
@@ -481,13 +503,11 @@ function ProjectStep({
 }) {
   return (
     <div>
-      <span className="mb-6 grid size-12 place-items-center rounded-2xl bg-foreground text-background shadow-sm">
-        <FolderOpenIcon className="size-5" aria-hidden="true" />
-      </span>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <FolderOpenIcon className="mb-6 size-6 text-muted-foreground" aria-hidden="true" />
+      <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Project
       </p>
-      <h1 className="text-3xl font-semibold tracking-[-0.04em]">
+      <h1 className="text-balance text-3xl font-semibold tracking-tight">
         {hasProjects ? "Your canvas is ready." : "Choose your first project."}
       </h1>
       <p className="mt-3 max-w-[42ch] text-sm leading-6 text-muted-foreground">
@@ -497,7 +517,7 @@ function ProjectStep({
       </p>
       {hasProjects ? (
         <div className="mt-8 grid gap-2.5">
-          <Button className="h-12 w-full rounded-xl text-base" onClick={onOpenWorkspace}>
+          <Button className={DESIGN_ONBOARDING_PRIMARY_BUTTON_CLASS} onClick={onOpenWorkspace}>
             Open workspace
             <ArrowRightIcon className="size-4" />
           </Button>
@@ -511,7 +531,10 @@ function ProjectStep({
           </Button>
         </div>
       ) : (
-        <Button className="mt-8 h-12 w-full rounded-xl text-base" onClick={onChooseFolder}>
+        <Button
+          className={cn("mt-8", DESIGN_ONBOARDING_PRIMARY_BUTTON_CLASS)}
+          onClick={onChooseFolder}
+        >
           <FolderOpenIcon className="size-4" />
           Choose project folder
         </Button>
