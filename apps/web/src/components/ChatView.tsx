@@ -7034,6 +7034,8 @@ function ChatViewContent(props: ChatViewProps) {
                   >
                     <DesignWorkflowPicker
                       target={composerDraftTarget}
+                      environmentId={environmentId}
+                      cwd={gitCwd}
                       promptRef={promptRef}
                       composerRef={composerRef}
                       className={isDraftHeroState ? "mb-3" : "mb-2"}

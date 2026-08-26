@@ -1,9 +1,7 @@
 import {
   ArrowRightIcon,
-  BotIcon,
   CheckIcon,
   ChevronLeftIcon,
-  Code2Icon,
   FolderOpenIcon,
   FrameIcon,
   SparklesIcon,
@@ -11,9 +9,22 @@ import {
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { openCommandPalette } from "../commandPaletteBus";
+import { ClaudeAI, OpenAI, type Icon } from "../components/Icons";
 import { Button } from "../components/ui/button";
 import { cn } from "../lib/utils";
 import { useProjects } from "../state/entities";
+import {
+  BUNDLED_DESIGN_SYSTEMS,
+  loadBundledDesignSystem,
+  readActiveDesignSystem,
+  writeActiveDesignSystem,
+} from "../design/designSystems";
+import {
+  DESIGN_INFLUENCES,
+  readDesignInfluenceIds,
+  writeDesignInfluenceIds,
+  type DesignInfluenceId,
+} from "../design/influences";
 import {
   completeDesignOnboarding,
   hasCompletedDesignOnboarding,
@@ -22,25 +33,25 @@ import {
   type DesignAgentPreference,
 } from "./designOnboarding";
 
-const LAST_STEP = 3;
+const LAST_STEP = 4;
 
 const AGENT_OPTIONS: ReadonlyArray<{
   readonly id: DesignAgentPreference;
   readonly title: string;
   readonly body: string;
-  readonly icon: typeof Code2Icon;
+  readonly icon: Icon;
 }> = [
   {
     id: "codex",
     title: "Codex",
     body: "Use your local Codex CLI, models, skills, and project rules.",
-    icon: Code2Icon,
+    icon: OpenAI,
   },
   {
     id: "claudeAgent",
     title: "Claude",
     body: "Use Claude Code with the same canvas and review loop.",
-    icon: BotIcon,
+    icon: ClaudeAI,
   },
 ];
 
@@ -51,6 +62,10 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
   const [step, setStep] = useState(0);
   const [agent, setAgent] = useState<DesignAgentPreference>(
     () => readDesignAgentPreference() ?? "codex",
+  );
+  const [influenceIds, setInfluenceIds] = useState<DesignInfluenceId[]>(readDesignInfluenceIds);
+  const [designSystemId, setDesignSystemId] = useState<string | null>(
+    () => readActiveDesignSystem()?.id ?? null,
   );
 
   const finish = useCallback((shouldOpenProjectPicker: boolean) => {
@@ -89,7 +104,7 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
             </span>
             <span className="text-sm font-semibold tracking-[-0.02em]">Design Harness</span>
           </div>
-          <div className="flex items-center gap-1.5" aria-label={`Step ${step + 1} of 4`}>
+          <div className="flex items-center gap-1.5" aria-label={`Step ${step + 1} of 5`}>
             {Array.from({ length: LAST_STEP + 1 }, (_, index) => (
               <span
                 key={index}
@@ -102,11 +117,17 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
           </div>
         </header>
 
-        <div className="no-drag mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center py-10">
+        <div
+          key={step}
+          className={cn(
+            "no-drag mx-auto flex min-h-0 w-full max-w-[440px] flex-1 flex-col justify-start overflow-y-auto py-4",
+            step === 0 && "justify-center",
+          )}
+        >
           {step > 0 ? (
             <button
               type="button"
-              className="mb-8 inline-flex min-h-10 w-fit items-center gap-1 rounded-lg px-1 text-sm font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="mb-2 inline-flex min-h-10 w-fit items-center gap-1 rounded-lg px-1 text-sm font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => setStep((current) => Math.max(0, current - 1))}
             >
               <ChevronLeftIcon className="size-4" aria-hidden="true" />
@@ -129,7 +150,32 @@ export function DesignOnboardingGate({ children }: { readonly children: ReactNod
               }}
             />
           ) : step === 2 ? (
-            <DesignContextStep onContinue={() => setStep(3)} />
+            <DesignInfluenceStep
+              selectedIds={influenceIds}
+              onChange={(nextIds) => {
+                setInfluenceIds(nextIds);
+                writeDesignInfluenceIds(nextIds);
+              }}
+              onContinue={() => {
+                writeDesignInfluenceIds(influenceIds);
+                setStep(3);
+              }}
+            />
+          ) : step === 3 ? (
+            <DesignContextStep
+              selectedId={designSystemId}
+              onSelect={(nextId) => {
+                setDesignSystemId(nextId);
+                if (nextId === null) {
+                  writeActiveDesignSystem(null);
+                } else {
+                  void loadBundledDesignSystem(nextId).then((system) => {
+                    if (system) writeActiveDesignSystem(system);
+                  });
+                }
+              }}
+              onContinue={() => setStep(4)}
+            />
           ) : (
             <ProjectStep
               hasProjects={hasProjects}
@@ -264,51 +310,163 @@ function AgentStep({
   );
 }
 
-function DesignContextStep({ onContinue }: { readonly onContinue: () => void }) {
-  const contextFiles = [
-    ["AGENTS.md", "Project rules and commands"],
-    ["BRIEF.md", "The current product goal"],
-    ["DESIGN.md", "Visual language and craft rules"],
-  ] as const;
+function DesignInfluenceStep({
+  selectedIds,
+  onChange,
+  onContinue,
+}: {
+  readonly selectedIds: DesignInfluenceId[];
+  readonly onChange: (ids: DesignInfluenceId[]) => void;
+  readonly onContinue: () => void;
+}) {
+  return (
+    <div>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        Design influences
+      </p>
+      <h1 className="text-3xl font-semibold tracking-[-0.04em]">Choose who shapes the critique.</h1>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">
+        Add opinionated craft lenses to every design turn. Mix them, remove them, or change them
+        beside the workflow controls later.
+      </p>
+      <div className="mt-6 grid gap-2" role="group" aria-label="Design influences">
+        {DESIGN_INFLUENCES.map((influence) => {
+          const selected = selectedIds.includes(influence.id);
+          return (
+            <label key={influence.id} className="block cursor-pointer">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={selected}
+                onChange={(event) =>
+                  onChange(
+                    event.currentTarget.checked
+                      ? [...selectedIds, influence.id]
+                      : selectedIds.filter((id) => id !== influence.id),
+                  )
+                }
+              />
+              <span
+                className={cn(
+                  "grid min-h-[60px] grid-cols-[36px_minmax(0,1fr)_20px] items-center gap-3 rounded-xl bg-card/45 px-3 py-2 shadow-[0_0_0_1px_var(--contrast-border)] transition-[background-color,box-shadow,transform] duration-150 hover:bg-accent/45 active:scale-[0.99] peer-focus-visible:ring-2 peer-focus-visible:ring-ring motion-reduce:transition-none",
+                  selected &&
+                    "bg-card shadow-[0_0_0_1.5px_var(--contrast-foreground),0_6px_20px_rgb(0_0_0/0.05)]",
+                )}
+              >
+                <span className="grid size-9 place-items-center rounded-lg bg-background text-xs font-semibold shadow-[0_0_0_1px_var(--contrast-border)]">
+                  {influence.name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .join("")
+                    .slice(0, 2)}
+                </span>
+                <span className="min-w-0">
+                  <span className="flex items-baseline justify-between gap-3">
+                    <strong className="text-sm font-semibold">{influence.name}</strong>
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
+                      {influence.source}
+                    </span>
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">
+                    {influence.description}
+                  </span>
+                </span>
+                <span
+                  className={cn(
+                    "grid size-5 place-items-center rounded-full border border-border text-transparent",
+                    selected && "border-foreground bg-foreground text-background",
+                  )}
+                >
+                  <CheckIcon className="size-3" aria-hidden="true" />
+                </span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+      <Button className="mt-6 h-12 w-full rounded-xl text-base" onClick={onContinue}>
+        Continue
+      </Button>
+    </div>
+  );
+}
 
+function DesignContextStep({
+  selectedId,
+  onSelect,
+  onContinue,
+}: {
+  readonly selectedId: string | null;
+  readonly onSelect: (id: string | null) => void;
+  readonly onContinue: () => void;
+}) {
   return (
     <div>
       <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
         Design context
       </p>
-      <h1 className="text-3xl font-semibold tracking-[-0.04em]">Your project stays in control.</h1>
+      <h1 className="text-3xl font-semibold tracking-[-0.04em]">Start from a design system.</h1>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
-        The agent reads design context from the repository. The same rules work for people, Codex,
-        and Claude.
+        Pull a full Open Design system into the project, or start with repository rules only. You
+        can switch systems while the thread is active.
       </p>
-      <div className="mt-7 overflow-hidden rounded-2xl bg-card/45 shadow-[0_0_0_1px_var(--contrast-border)]">
-        {contextFiles.map(([name, description], index) => (
-          <div
-            key={name}
-            className={cn(
-              "grid grid-cols-[32px_minmax(0,1fr)] items-center gap-3 px-4 py-3.5",
-              index > 0 && "border-t border-border/70",
-            )}
-          >
-            <span className="grid size-8 place-items-center rounded-lg bg-background text-muted-foreground shadow-[0_0_0_1px_var(--contrast-border)]">
-              <CheckIcon className="size-4" aria-hidden="true" />
-            </span>
-            <span>
-              <strong className="block font-mono text-xs font-semibold text-foreground">
-                {name}
-              </strong>
-              <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>
-            </span>
-          </div>
+      <div className="mt-4 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Design system">
+        <DesignSystemChoice
+          title="Project default"
+          description="Use the repository context."
+          selected={selectedId === null}
+          onSelect={() => onSelect(null)}
+        />
+        {BUNDLED_DESIGN_SYSTEMS.map((system) => (
+          <DesignSystemChoice
+            key={system.id}
+            title={system.title}
+            description={system.category}
+            selected={selectedId === system.id}
+            onSelect={() => onSelect(system.id)}
+          />
         ))}
       </div>
-      <p className="mt-4 text-xs leading-5 text-muted-foreground">
-        Missing files are optional. You can add them when the project needs stronger direction.
+      <p className="mt-2 text-xs leading-5 text-muted-foreground">
+        The active system is saved under <code>.design-harness/design-systems</code> and added as
+        context on every design turn.
       </p>
-      <Button className="mt-7 h-12 w-full rounded-xl text-base" onClick={onContinue}>
+      <Button className="mt-4 h-12 w-full rounded-xl text-base" onClick={onContinue}>
         Continue
       </Button>
     </div>
+  );
+}
+
+function DesignSystemChoice({
+  title,
+  description,
+  selected,
+  onSelect,
+}: {
+  readonly title: string;
+  readonly description: string;
+  readonly selected: boolean;
+  readonly onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      className={cn(
+        "min-h-[60px] rounded-xl bg-card/45 px-3 py-2 text-left shadow-[0_0_0_1px_var(--contrast-border)] outline-none transition-[background-color,box-shadow,transform] duration-150 hover:bg-accent/45 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+        selected &&
+          "bg-card shadow-[0_0_0_1.5px_var(--contrast-foreground),0_6px_20px_rgb(0_0_0/0.05)]",
+      )}
+      onClick={onSelect}
+    >
+      <span className="flex items-center justify-between gap-2">
+        <strong className="text-sm font-semibold">{title}</strong>
+        {selected ? <CheckIcon className="size-3.5" aria-hidden="true" /> : null}
+      </span>
+      <span className="mt-1 block text-[11px] leading-4 text-muted-foreground">{description}</span>
+    </button>
   );
 }
 

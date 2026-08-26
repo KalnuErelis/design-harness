@@ -263,6 +263,9 @@ import {
 } from "../../providerInstances";
 import { type AppModelOption, getAppModelOptionsForInstance } from "../../modelSelection";
 import { useDesignAgentPreference } from "../../onboarding/designOnboarding";
+import { useActiveDesignSystem } from "../../design/designSystems";
+import { useDesignInfluenceIds } from "../../design/influences";
+import { composeDesignProviderInput } from "../../design/providerContext";
 import type { UnifiedSettings } from "@t3tools/contracts/settings";
 import type { SessionPhase, Thread } from "../../types";
 import type { PendingUserInputDraftAnswer } from "../../pendingUserInput";
@@ -827,6 +830,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     [providerStatuses, settings],
   );
   const designAgentPreference = useDesignAgentPreference();
+  const activeDesignSystem = useActiveDesignSystem();
+  const designInfluenceIds = useDesignInfluenceIds();
   const preferredProviderEntry = useMemo(
     () =>
       designAgentPreference
@@ -1979,16 +1984,30 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
         });
         return;
       }
+      const visiblePrompt = promptRef.current;
+      const providerInput = activePendingProgress
+        ? visiblePrompt
+        : composeDesignProviderInput({
+            prompt: visiblePrompt,
+            designSystem: activeDesignSystem,
+            influenceIds: designInfluenceIds,
+          });
       const submission = submitComposerDraft({
-        prompt: promptRef.current,
+        prompt: visiblePrompt,
+        providerInput,
         submissionTarget: activePendingProgress ? "pending-user-input" : "provider-turn",
         event,
         onSend: (sendEvent) => {
           // ChatView reports its final composed-input preflight through the
           // composer handle before its first asynchronous send step.
           providerInputRejectedRef.current = false;
+          promptRef.current = providerInput;
           onSend(sendEvent, intent);
-          return !providerInputRejectedRef.current;
+          const accepted = !providerInputRejectedRef.current;
+          if (!accepted || promptRef.current === providerInput) {
+            promptRef.current = visiblePrompt;
+          }
+          return accepted;
         },
       });
       setComposerSubmissionError(submission.validationMessage);
@@ -1998,9 +2017,11 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       }
     },
     [
+      activeDesignSystem,
       activeThreadId,
       activePendingProgress,
       blurMobileComposerAfterSend,
+      designInfluenceIds,
       isSendDisabled,
       noProviderAvailable,
       onSend,

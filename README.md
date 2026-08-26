@@ -11,6 +11,8 @@ The core loop is:
 - Start with a guided Codex or Claude setup.
 - Open a local project.
 - Choose a design workflow.
+- Pull an Open Design system or import a local `DESIGN.md` as live thread context.
+- Add opinionated craft approaches from Emil Kowalski and similar creators.
 - Run Codex or Claude in the real project folder.
 - Open the live interface in the design canvas.
 - Test desktop, tablet, mobile, and custom viewports.
