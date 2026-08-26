@@ -6,6 +6,7 @@ import { Button } from "~/components/ui/button";
 import {
   Menu,
   MenuCheckboxItem,
+  MenuGroup,
   MenuGroupLabel,
   MenuItem,
   MenuPopup,
@@ -120,36 +121,38 @@ export function DesignContextControls({
           </span>
         </MenuTrigger>
         <MenuPopup align="end" side="top" sideOffset={8} className="w-80">
-          <MenuGroupLabel>Active design system</MenuGroupLabel>
-          <MenuRadioGroup
-            value={activeDesignSystem?.id ?? "none"}
-            onValueChange={(value) => {
-              if (value === "none") writeActiveDesignSystem(null);
-              else if (!value.startsWith("custom:")) void selectBundledDesignSystem(value);
-            }}
-          >
-            <MenuRadioItem value="none">
-              <span className="text-sm">No design system</span>
-            </MenuRadioItem>
-            {activeDesignSystem?.source === "imported" ? (
-              <MenuRadioItem value={activeDesignSystem.id}>
-                <DesignSystemOption
-                  title={activeDesignSystem.title}
-                  category="Imported DESIGN.md"
-                  description={activeDesignSystem.description}
-                />
+          <MenuGroup>
+            <MenuGroupLabel>Active design system</MenuGroupLabel>
+            <MenuRadioGroup
+              value={activeDesignSystem?.id ?? "none"}
+              onValueChange={(value) => {
+                if (value === "none") writeActiveDesignSystem(null);
+                else if (!value.startsWith("custom:")) void selectBundledDesignSystem(value);
+              }}
+            >
+              <MenuRadioItem value="none">
+                <span className="text-sm">No design system</span>
               </MenuRadioItem>
-            ) : null}
-            {BUNDLED_DESIGN_SYSTEMS.map((system) => (
-              <MenuRadioItem key={system.id} value={system.id}>
-                <DesignSystemOption
-                  title={system.title}
-                  category={system.category}
-                  description={system.description}
-                />
-              </MenuRadioItem>
-            ))}
-          </MenuRadioGroup>
+              {activeDesignSystem?.source === "imported" ? (
+                <MenuRadioItem value={activeDesignSystem.id}>
+                  <DesignSystemOption
+                    title={activeDesignSystem.title}
+                    category="Imported DESIGN.md"
+                    description={activeDesignSystem.description}
+                  />
+                </MenuRadioItem>
+              ) : null}
+              {BUNDLED_DESIGN_SYSTEMS.map((system) => (
+                <MenuRadioItem key={system.id} value={system.id}>
+                  <DesignSystemOption
+                    title={system.title}
+                    category={system.category}
+                    description={system.description}
+                  />
+                </MenuRadioItem>
+              ))}
+            </MenuRadioGroup>
+          </MenuGroup>
           <MenuSeparator />
           <MenuItem onClick={() => importInputRef.current?.click()}>
             <FileUpIcon />
@@ -175,27 +178,29 @@ export function DesignContextControls({
           Influences{influenceIds.length > 0 ? ` · ${influenceIds.length}` : ""}
         </MenuTrigger>
         <MenuPopup align="end" side="top" sideOffset={8} className="w-80">
-          <MenuGroupLabel>Design influences</MenuGroupLabel>
-          {DESIGN_INFLUENCES.map((influence) => (
-            <MenuCheckboxItem
-              key={influence.id}
-              checked={influenceIds.includes(influence.id)}
-              onCheckedChange={(checked) => setInfluence(influence.id, checked)}
-              className="items-start py-2"
-            >
-              <span className="block min-w-0">
-                <span className="flex items-baseline justify-between gap-3">
-                  <strong className="text-sm font-medium">{influence.name}</strong>
-                  <span className="shrink-0 text-[10px] text-muted-foreground">
-                    {influence.source}
+          <MenuGroup>
+            <MenuGroupLabel>Design influences</MenuGroupLabel>
+            {DESIGN_INFLUENCES.map((influence) => (
+              <MenuCheckboxItem
+                key={influence.id}
+                checked={influenceIds.includes(influence.id)}
+                onCheckedChange={(checked) => setInfluence(influence.id, checked)}
+                className="items-start py-2"
+              >
+                <span className="block min-w-0">
+                  <span className="flex items-baseline justify-between gap-3">
+                    <strong className="text-sm font-medium">{influence.name}</strong>
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
+                      {influence.source}
+                    </span>
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">
+                    {influence.description}
                   </span>
                 </span>
-                <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">
-                  {influence.description}
-                </span>
-              </span>
-            </MenuCheckboxItem>
-          ))}
+              </MenuCheckboxItem>
+            ))}
+          </MenuGroup>
           {influenceIds.length > 0 ? (
             <>
               <MenuSeparator />
