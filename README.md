@@ -27,6 +27,7 @@ Requirements:
 - Node.js 24.13 or newer
 - pnpm 11.10.0 through Corepack
 - Codex CLI or Claude Code
+- Rust 1.95 or newer only when you make a desktop package
 
 ```bash
 corepack pnpm install --frozen-lockfile
