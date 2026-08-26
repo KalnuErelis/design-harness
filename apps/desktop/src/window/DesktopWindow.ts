@@ -129,6 +129,13 @@ function getInitialWindowBackgroundColor(shouldUseDarkColors: boolean): string {
   return shouldUseDarkColors ? "#0a0a0a" : "#ffffff";
 }
 
+function getMainWindowBackgroundColor(
+  shouldUseDarkColors: boolean,
+  platform: NodeJS.Platform,
+): string {
+  return platform === "darwin" ? "#00000000" : getInitialWindowBackgroundColor(shouldUseDarkColors);
+}
+
 type DisplayBounds = Pick<Electron.Rectangle, "x" | "y" | "width" | "height">;
 
 function windowFitsWithinDisplay(
@@ -238,7 +245,7 @@ function syncWindowAppearance(
       return;
     }
 
-    window.setBackgroundColor(getInitialWindowBackgroundColor(shouldUseDarkColors));
+    window.setBackgroundColor(getMainWindowBackgroundColor(shouldUseDarkColors, platform));
     const { titleBarOverlay } = getWindowTitleBarOptions(shouldUseDarkColors, platform);
     if (typeof titleBarOverlay === "object") {
       window.setTitleBarOverlay(titleBarOverlay);
@@ -353,7 +360,10 @@ export const make = Effect.gen(function* () {
       show: false,
       autoHideMenuBar: true,
       ...(environment.platform === "darwin" ? { disableAutoHideCursor: true } : {}),
-      backgroundColor: getInitialWindowBackgroundColor(shouldUseDarkColors),
+      backgroundColor: getMainWindowBackgroundColor(shouldUseDarkColors, environment.platform),
+      ...(environment.platform === "darwin"
+        ? { vibrancy: "under-window" as const, visualEffectState: "active" as const }
+        : {}),
       ...iconOption,
       title: environment.displayName,
       ...getWindowTitleBarOptions(shouldUseDarkColors, environment.platform),

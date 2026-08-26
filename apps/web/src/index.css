@@ -2521,3 +2521,31 @@ code {
     transform: scaleX(0.9);
   }
 }
+
+/* macOS uses one native window material. Product surfaces stay opaque where
+   text density requires it; only the app chrome lets the material through. */
+.design-harness-macos [data-app-sidebar] {
+  background: color-mix(in srgb, var(--sidebar) 78%, transparent);
+}
+
+.design-harness-macos [data-app-sidebar] [data-slot="sidebar-inner"] {
+  background-color: transparent;
+}
+
+.design-harness-macos [data-chat-header] {
+  background: color-mix(in srgb, var(--background) 86%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .design-harness-macos [data-app-sidebar] {
+    background: var(--sidebar);
+  }
+
+  .design-harness-macos [data-app-sidebar] [data-slot="sidebar-inner"] {
+    background-color: var(--sidebar);
+  }
+
+  .design-harness-macos [data-chat-header] {
+    background: var(--background);
+  }
+}

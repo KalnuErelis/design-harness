@@ -1,5 +1,5 @@
 {
-  "name": "@t3tools/monorepo",
+  "name": "@design-harness/monorepo",
   "private": true,
   "type": "module",
   "scripts": {

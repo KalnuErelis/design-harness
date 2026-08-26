@@ -278,6 +278,7 @@ import {
 } from "../state/entities";
 import { environmentShell } from "../state/shell";
 import { ChatComposer, type ChatComposerHandle } from "./chat/ChatComposer";
+import { DesignWorkflowPicker } from "../design/DesignWorkflowPicker";
 import { DraftHeroHeadline } from "./chat/DraftHeroHeadline";
 import { ExpandedImageDialog } from "./chat/ExpandedImageDialog";
 import { PullRequestThreadDialog } from "./PullRequestThreadDialog";
@@ -3531,6 +3532,21 @@ function ChatViewContent(props: ChatViewProps) {
       createBrowserSurface();
     }
   }, [activePreviewState.activeTabId, activeThreadRef, createBrowserSurface, previewPanelOpen]);
+  const autoOpenedDesignCanvasRef = useRef(new Set<string>());
+  useEffect(() => {
+    if (!activeThreadRef || !activeProject || !isPreviewSupportedInRuntime()) return;
+    if (rightPanelState.surfaces.some((surface) => surface.kind === "preview")) return;
+    if (autoOpenedDesignCanvasRef.current.has(routeThreadKey)) return;
+
+    autoOpenedDesignCanvasRef.current.add(routeThreadKey);
+    createBrowserSurface();
+  }, [
+    activeProject,
+    activeThreadRef,
+    createBrowserSurface,
+    rightPanelState.surfaces,
+    routeThreadKey,
+  ]);
   const closePreviewPanel = useCallback(() => {
     if (activeThreadRef) {
       setMaximizedRightPanelThreadKey(null);
@@ -6820,7 +6836,10 @@ function ChatViewContent(props: ChatViewProps) {
     composerBannerItems.length > 0 || Boolean(threadSyncPhase && !activeEnvironmentUnavailable);
 
   return (
-    <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
+    <div
+      className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background"
+      data-design-harness-workspace="true"
+    >
       {rightPanelOpen && !shouldUseRightPanelSheet ? panelLayoutControls : null}
       <div
         className={cn(
@@ -7013,6 +7032,12 @@ function ChatViewContent(props: ChatViewProps) {
                         : undefined
                     }
                   >
+                    <DesignWorkflowPicker
+                      target={composerDraftTarget}
+                      promptRef={promptRef}
+                      composerRef={composerRef}
+                      className={isDraftHeroState ? "mb-3" : "mb-2"}
+                    />
                     <div
                       className={cn(
                         "chat-composer-glass-shell relative mx-auto w-full max-w-3xl",
@@ -7241,6 +7266,8 @@ function ChatViewContent(props: ChatViewProps) {
         <RightPanelTabs
           mode="inline"
           maximized={rightPanelMaximized}
+          widthStorageKey="design-harness:canvas-width"
+          defaultWidth={760}
           surfaces={rightPanelState.surfaces}
           activeSurfaceId={activeRightPanelSurface?.id ?? null}
           pendingSurfaceIds={pendingFileSurfaceIds}

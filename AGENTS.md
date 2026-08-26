@@ -1,44 +1,32 @@
-# T3 Code
+# Design Harness
 
-T3 Code is a minimal GUI for coding agents. A Node WebSocket server wraps provider CLIs (Codex, Claude Code, Cursor, Grok, OpenCode) and serves web, desktop, and mobile clients.
+Design Harness is a local design workspace for coding agents. It uses T3 Code's server, provider, checkpoint, and preview foundation. The product starts from the live interface and writes changes to the real project files.
 
-You can think of T3 Code as an open source "bring-your-own-subscription" alternative to apps like Claude Desktop, Codex App, Cursor Glass and Conductor.
+The main loop is brief → generate → preview → annotate → revise → compare → restore.
 
-## What makes T3 Code special?
+## Product rules
 
-We have over 200,000 users who love T3 Code. It's important we maintain the things they love as we continue to iterate on the product. Here's a brief list of the things we can never compromise on.
+### 1. The design result comes first
 
-### 1. Open at the core
+The live interface is the main surface. Chat, files, and diffs support the design canvas. Do not add a separate artifact format when project files are sufficient.
 
-T3 Code is truly open. We share our roadmap, we share how we think about things, and of course we share all our code. A large number of our users run forks. We work in the open, and should strive to stay that way.
+### 2. Performance is a product feature
 
-### 2. Performance without compromise
+Measure changes that affect startup, WebSocket traffic, long lists, preview resizing, CPU use, or GPU use. Do not add continuous decorative animation. A common interaction must not become more than 10% slower without a clear user benefit.
 
-Lots of apps have gotten bogged down with bad tech decisions and "slop". We have not, and we're proud of the performance of T3 Code. We regularly audit for performance regressions, often caused by sending too much data over websockets, css animations causing gpu spikes, lists being hard to render, and more. Make sure all changes are considerate of performance impact.
+### 3. Keep the product open and local
 
-### 3. Remote ready
+Users bring their existing agent subscription. Project files and design context stay portable. Preserve the upstream license and source notices.
 
-The architecture of T3 Code's websocket layer (npx t3) enables a lot of awesome remote features. These have become core to the product. Whether users are connecting directly over their local network, using Tailscale, or leaning in fully with T3 Connect (our tunnel solution, also in this repo), we need to make sure new features are properly supported.
+### 4. Keep the first release narrow
 
-### 4. Multi-surface
+Desktop is the primary product surface. Codex and Claude are the supported providers. The web client can keep core chat support, but the design canvas is desktop-only. Mobile, relay, tunnel, cloud account, and team features are not release requirements.
 
-T3 Code has 3 key app surfaces: **web**, **desktop**, and **mobile**.
+### 5. Keep the system simple
 
-**Web** is kind of two surfaces, as we have the public facing "app.t3.codes" as well as locally hosting the web app through the `npx t3` command. Both need to be supported by all new features where reasonable.
+Do not preserve complexity only because it came from upstream. Do not add machinery because it looks impressive. Find the real constraint, then use the smallest model that makes the correct behavior clear.
 
-**Desktop** is the main surface most users install first. It's a full Electron app that bundles the server runner as well. The desktop app can also be used as the host server, allowing remote connections from app.t3.codes or the mobile app.
-
-**Mobile** is a React Native app for both iOS and Android, available on the App Store and Google Play. The mobile app allows for connecting to any T3 Code server to control work remotely.
-
-## A note from Theo
-
-I like ambitious ideas, simple systems, and software that feels obvious. Do not preserve complexity just because it already exists. Do not introduce machinery because it looks architecturally impressive. Understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising.
-
-Channel both "measure twice, cut once" and "yagni". Fight scope creep. Try to honor the dev's intent in both a minimal and realistic fashion.
-
-The rest of this document is meant to help you navigate the codebase and make changes effectively. Think of these instructions less as "hard rules", more as "good defaults". The developer's preferences should be able to override anything here.
-
-Of note: Most T3 Code contributions will come from T3 Code itself, often controlled remotely. This means you should be careful about accessing data, killing dev servers, and other things that may damage the T3 Code instance that the contributor is using.
+Be careful with running development data and processes. This machine can run the installed T3 Code app and Design Harness at the same time.
 
 ## A small glossary
 
@@ -62,17 +50,17 @@ We need to be on the same page with terminology. When communicating, use this la
 2. **Writing to the live install.** `~/.t3/userdata` is the developer's real T3 Code database, in use while you work. Reading it and copying from it are fine, and a good way to get real test data (see Test data). Never start a server against it, never open it read-write, never clean it up.
 3. **Baking in origins.** Never set `VITE_HTTP_URL` or `VITE_WS_URL` for dev. Dev is single-origin and Vite proxies `/api`, `/ws`, `/oauth`, and `/.well-known`. Setting them bakes localhost into the bundle and silently breaks every remote browser.
 
-## Hit every surface
+## Check each supported surface
 
-The most common defect in this repo is a change that works on the path you tested and is missing everywhere else. Before calling frontend work done, walk this list and say which entries applied:
+Before you call product work done, check these items:
 
-- **Entry points.** A behavior reachable from the chat view is usually also reachable from Settings, the command palette, and a keybinding. Fixing one is not fixing the feature.
-- **Clients.** Web, desktop (wraps web, adds Electron shell/IPC), and mobile (React Native, separate navigation). Shared logic lives in `packages/client-runtime`
-- **Providers.** Codex, Claude, Cursor, Grok, and OpenCode each have an adapter. Provider-shaped features need a decision per adapter, even if the decision is "not supported here".
-- **Contracts.** Anything crossing the wire is typed in `packages/contracts`. Change the schema and the server, web, mobile, and desktop all follow.
-- **Reverse states.** If you added a way in, add the way out and the way to see it. Snooze needs unsnooze. Close needs reopen. A one-way door is a bug.
-- **Connection modes.** Local, remote/relay, and tunnel behave differently. Multi-device and multi-environment cases are real.
-- **Docs.** `docs/` splits by audience. Behavior changes that a user would notice belong in `docs/user/` (shipped-product voice, no repo tooling or source paths); architecture and contributor changes in `docs/internals/`; runbooks in `docs/operations/`; new vocabulary in `docs/internals/glossary.md`.
+- **Entry points.** A common action can also need a command-palette item or keybinding. Add only the entry points that serve a real workflow.
+- **Clients.** Desktop owns the full design workflow. Web owns chat and project control where the feature does not need Electron. Mobile is out of scope.
+- **Providers.** Codex and Claude are supported. Other upstream adapters can remain, but new product work does not need to extend them.
+- **Contracts.** Anything that crosses the wire is typed in `packages/contracts`.
+- **Reverse states.** Add a clear way out. Close needs reopen. Apply needs restore. A one-way action is a defect.
+- **Connection modes.** Local desktop is the release path. Remote, relay, and tunnel support is optional.
+- **Docs.** User behavior belongs in `docs/user/`. Architecture belongs in `docs/internals/`. Runbooks belong in `docs/operations/`. New terms belong in `docs/internals/glossary.md`.
 
 ## Dev servers
 
