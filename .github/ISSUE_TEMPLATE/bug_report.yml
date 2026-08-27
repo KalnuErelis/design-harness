@@ -9,7 +9,7 @@ body:
     attributes:
       value: |
         Use this form for broken behavior, regressions, crashes, or reliability problems.
-        Feature requests belong in [Discussions](https://github.com/pingdotgg/t3code/discussions/categories/ideas).
+        Feature requests belong in [Discussions](https://github.com/jauniuskadunas/design-harness/discussions/categories/ideas).
         Search existing issues first and keep the report focused on one problem.
 
   - type: checkboxes
@@ -28,11 +28,11 @@ body:
       label: Area
       description: Which part of the project is affected?
       options:
-        - apps/web
-        - apps/server
-        - apps/desktop
-        - apps/mobile
-        - packages/contracts or packages/shared
+        - Design canvas or annotation
+        - Desktop shell or preview
+        - Provider or server
+        - Checkpoints or source control
+        - Shared contracts or runtime
         - Build, CI, or release tooling
         - Docs
         - Not sure
@@ -102,14 +102,11 @@ body:
       description: Paste the most relevant output only. Redact secrets.
       render: shell
 
-  - type: upload
+  - type: textarea
     id: attachments
     attributes:
       label: Screenshots, recordings, or supporting files
-      description: Upload screenshots, short recordings, repro archives, or log files. Redact secrets before uploading.
-    validations:
-      required: false
-      accept: ".png,.jpg,.jpeg,.gif,.webp,.svg,.mp4,.mov,.webm,.log,.txt,.json,.zip"
+      description: Drag in screenshots, short recordings, or small repro files. Redact secrets before uploading.
 
   - type: textarea
     id: workaround

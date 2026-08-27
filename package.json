@@ -1,6 +1,15 @@
 {
   "name": "@design-harness/monorepo",
   "private": true,
+  "homepage": "https://github.com/jauniuskadunas/design-harness#readme",
+  "bugs": {
+    "url": "https://github.com/jauniuskadunas/design-harness/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jauniuskadunas/design-harness.git"
+  },
   "type": "module",
   "scripts": {
     "prepare": "node scripts/clean-tsgo-backups.mjs && effect-tsgo patch && vp config --no-agent",

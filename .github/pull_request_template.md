@@ -1,33 +1,18 @@
-<!--
-⚠️ READ BEFORE OPENING ⚠️
+## Problem
 
-We are not actively accepting contributions right now.
+<!-- What user or maintainer problem does this solve? -->
 
-You can still open a PR, but please do so knowing there is a high chance
-we may close it without merging it, or never review it.
+## Change
 
-- Small, focused PRs are strongly preferred. Bug fixes are most likely to be merged.
-- New features will most likely just annoy us.
-- 1,000+ line PRs with a bunch of new features will probably get you banned from the repo.
--->
+<!-- Explain the implementation and important tradeoffs. -->
 
-## What Changed
+## Proof
 
-<!-- Describe the change clearly and keep scope tight. -->
-
-## Why
-
-<!-- Explain the problem being solved and why this approach is the right one. -->
-
-## UI Changes
-
-<!-- If this PR changes UI, include clear before/after screenshots.
-     If the change involves motion or interaction, include a short video.
-     Delete this section if not applicable. -->
+<!-- List focused tests and checks. Add before/after images for UI changes and a short video for motion or timing. -->
 
 ## Checklist
 
-- [ ] This PR is small and focused
-- [ ] I explained what changed and why
-- [ ] I included before/after screenshots for any UI changes
-- [ ] I included a video for animation/interaction changes
+- [ ] This pull request has one concern
+- [ ] I ran the smallest relevant tests and checks
+- [ ] I updated user or architecture documentation when behavior changed
+- [ ] I preserved third-party notices and did not add private data
