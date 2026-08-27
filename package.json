@@ -1,14 +1,14 @@
 {
   "name": "@design-harness/monorepo",
   "private": true,
-  "homepage": "https://github.com/jauniuskadunas/design-harness#readme",
+  "homepage": "https://github.com/KalnuErelis/design-harness#readme",
   "bugs": {
-    "url": "https://github.com/jauniuskadunas/design-harness/issues"
+    "url": "https://github.com/KalnuErelis/design-harness/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jauniuskadunas/design-harness.git"
+    "url": "https://github.com/KalnuErelis/design-harness.git"
   },
   "type": "module",
   "scripts": {
