@@ -1,0 +1,74 @@
+name: Triage report
+description: Filed from an agent-guided Design Harness triage session. For hand-written reports, use the bug report template.
+labels:
+  - via-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep one problem per issue. Redact secrets, credentials, private project data, and home directory paths.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: The problem in the user's own words.
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnosis
+    attributes:
+      label: Diagnosis
+      description: What the investigation found, grounded in logs and source.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal, deterministic reproduction steps.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Installed Design Harness version or commit.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Node version, and provider versions when relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: The most relevant redacted log lines, trace entries, or stack traces.
+      render: shell
+
+  - type: input
+    id: related
+    attributes:
+      label: Related issues
+      description: Similar issues and why this report is not a duplicate.
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Fix applied or workaround
+      description: Anything that unblocked the user.
+
+  - type: input
+    id: agent
+    attributes:
+      label: Filed by
+      description: Agent and model that produced this report.

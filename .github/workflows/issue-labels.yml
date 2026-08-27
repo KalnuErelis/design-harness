@@ -37,6 +37,11 @@ jobs:
                 color: "fbca04",
                 description: "Issue needs maintainer review and initial categorization.",
               },
+              {
+                name: "via-triage",
+                color: "5319e7",
+                description: "Report produced by an agent-guided triage session.",
+              },
             ];
 
             for (const label of managedLabels) {
